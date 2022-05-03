@@ -1,16 +1,16 @@
 <template>
   <div class="edit-table-container">
     <div class="edit-table-toolbar">
-      <div class="style-setter">{{ `${Store.global}: ${Store.count}` }}</div>
-      <div class="formula-setter" @click="handleClick"></div>
+      <div class="style-setter"></div>
+      <div class="formula-setter"></div>
     </div>
     <div class="edit-table-workboard">
       <div class="table-column-bar"></div>
       <div class="table-row-bar"></div>
       <!-- 表格编辑区 -->
-      <el-scrollbar class="edit-stage" always :min-size="10">
-        <div style="padding: 14px;">
-          <el-skeleton v-for="item in 10" :key="`skeleton_${item}`" />
+      <el-scrollbar class="edit-stage-container" always :min-size="8">
+        <div class="edit-stage" @click="handleClick">
+          {{ `${Store.global}: ${Store.count}` }}
         </div>
       </el-scrollbar>
 
@@ -67,7 +67,7 @@ const handleClick = () => {
   .edit-table-workboard {
     position: relative;
     flex: auto;
-    background-color: #fff;
+    background-color: #f6f6f6;
 
     .table-column-bar {
       position: absolute;
@@ -100,7 +100,7 @@ const handleClick = () => {
       width: 12px;
       overflow: hidden;
       background-color: #f6f6f6;
-      // display: none;
+      display: none;
     }
 
     .table-scrollbar-bottom {
@@ -112,26 +112,42 @@ const handleClick = () => {
       height: 12px;
       overflow: hidden;
       background-color: #f6f6f6;
-      // display: none;
+      display: none;
     }
 
-    .edit-stage {
+    .edit-stage-container {
       position: absolute;
       top: 34px;
       right: 12px;
-      bottom: 12px;
+      bottom: 14px;
       left: 34px;
       height: auto;
+      overflow: unset;
 
       :deep(.is-vertical) {
         right: -11px;
-        width: 10px;
+        width: 8px;
       }
+
       :deep(.is-horizontal) {
         bottom: -11px;
-        height: 10px;
+        height: 8px;
       }
-      
+
+      .edit-stage {
+        position: relative;
+        width: 2000px;
+        height: 2000px;
+        background-color: #fff;
+        // linear-gradient 参数可理解为：边线水平向角度，边线颜色，边线宽度起始值，填充色，边线宽度结束值
+        // 边线宽度 = Math.abs(边线宽度起始值 - 边线宽度结束值)
+        background-image:
+          linear-gradient(90deg, #dedede 1px, transparent 0px),
+          linear-gradient(0deg, #dedede 1px, transparent 0px);
+        background-position-x: -1px; // 取消左边第一根竖线
+        background-size: 80px 34px; // 格子宽高
+      }
+
     }
   }
 }
