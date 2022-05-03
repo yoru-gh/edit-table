@@ -1,8 +1,8 @@
 <template>
   <div class="edit-table-container">
     <div class="edit-table-toolbar">
-      <div class="style-setter"></div>
-      <div class="formula-setter"></div>
+      <div class="style-setter">{{ `${Store.global}: ${Store.count}` }}</div>
+      <div class="formula-setter" @click="handleClick"></div>
     </div>
     <div class="edit-table-workboard">
       <div class="table-column-bar"></div>
@@ -21,6 +21,15 @@
 </template>
 
 <script setup lang="ts">
+import mainStore from '@/store/index'
+const Store = mainStore()
+
+const handleClick = () => {
+  Store.$patch({
+    global: `Hello count ${Store.count}`,
+    count: Store.count + 2
+  })
+}
 </script>
 
 <style lang="scss" scoped>
