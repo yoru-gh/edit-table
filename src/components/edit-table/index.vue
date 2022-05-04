@@ -5,11 +5,34 @@
       <div class="formula-setter"></div>
     </div>
     <div class="edit-table-workboard">
-      <div class="table-column-bar"></div>
-      <div class="table-row-bar"></div>
+      <div class="table-column-bar" ref="$tableColumnBar">
+        <div
+          class="column-bar-scroll-warp"
+          :style="`width:${columnBarWidth}px`">
+          <div class="column-item" v-for="item in columnCodesObject" :key="item.code">
+            {{ item.code }}
+          </div>
+        </div>
+      </div>
+      <div class="table-row-bar" ref="$tableRowBar">
+        <div
+          class="row-bar-scroll-warp"
+          :style="`height:${rowBarHeight}px`">
+          <div class="row-item" v-for="item in rowNames" :key="item.name">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
       <!-- 表格编辑区 -->
-      <el-scrollbar class="edit-stage-container" always :min-size="8">
-        <div class="edit-stage" @click="handleClick">
+      <el-scrollbar
+        class="edit-stage-container"
+        always
+        :min-size="8"
+        @scroll="stageScroll">
+        <div
+          class="edit-stage"
+          :style="`width:${columnBarWidth}px;height:${rowBarHeight}px`"
+          @click="handleClick">
           {{ `${Store.global}: ${Store.count}` }}
         </div>
       </el-scrollbar>
@@ -21,6 +44,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { createColumnCodes, createColumnCodesObject, createRowNamesObject } from './utils/index'
+
+// 引入与 pinia
 import mainStore from '@/store/index'
 const Store = mainStore()
 
@@ -30,14 +57,57 @@ const handleClick = () => {
     count: Store.count + 2
   })
 }
+
+// 生成列名数组
+let columnCodes = ref()
+let columnCodesObject = ref()
+columnCodes.value = createColumnCodes()
+columnCodesObject.value = createColumnCodesObject(columnCodes.value)
+// console.log(columnCodesObject.value)
+// 列名栏宽度计算值
+let columnBarWidth = computed(() => {
+  return columnCodesObject.value.map((item:{ width: number }) => item.width).reduce((total:number, width:number) => {
+    return total + width
+  })
+})
+
+// 生成行号数组
+let rowNames = ref()
+rowNames.value = createRowNamesObject(40) // 生成 20 行
+// 行号栏高度计算值
+let rowBarHeight = computed(() => {
+  return rowNames.value.map((item:{ height: number }) => item.height).reduce((total:number, height:number) => {
+    return total + height
+  })
+})
+
+// 内容滚动时列名栏及行号栏跟随偏移
+let $tableColumnBar = ref<HTMLDivElement | undefined>()
+let $tableRowBar = ref<HTMLDivElement | undefined>()
+let stageScroll = (e:{ scrollLeft:number, scrollTop:number }) => {
+  // console.log(e.scrollLeft, e.scrollTop)
+  // console.log($tableColumnBar?.value?.scrollLeft)
+  $tableColumnBar!.value!.scrollLeft = e.scrollLeft
+  $tableRowBar!.value!.scrollTop = e.scrollTop
+}
+
+onMounted(() => {
+  // let $tableColumnBar = ref<HTMLDivElement>()
+  // console.log([$tableColumnBar.value])
+  // console.log([$tableRowBar.value])
+})
+
 </script>
 
 <style lang="scss" scoped>
+$cell-border-color: #ededed;
+
 .edit-table-container {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
+  font-size: 14px;
   background-color: #f7f7f7;
 
   .edit-table-toolbar {
@@ -68,6 +138,7 @@ const handleClick = () => {
     position: relative;
     flex: auto;
     background-color: #f6f6f6;
+    
 
     .table-column-bar {
       position: absolute;
@@ -78,6 +149,16 @@ const handleClick = () => {
       height: 34px;
       overflow: hidden;
       background-color: #f6f6f6;
+
+      .column-item {
+        box-sizing: border-box;
+        display: inline-block;
+        width: 80px;
+        height: 34px;
+        line-height: 34px;
+        text-align: center;
+        border: 1px $cell-border-color solid;
+      }
     }
 
     .table-row-bar {
@@ -89,6 +170,16 @@ const handleClick = () => {
       width: 34px;
       overflow: hidden;
       background-color: #f6f6f6;
+
+      .row-item {
+        box-sizing: border-box;
+        display: inline-block;
+        width: 34px;
+        height: 34px;
+        line-height: 34px;
+        padding: 0 4px;
+        border: 1px $cell-border-color solid;
+      }
     }
 
     .table-scrollbar-right {
@@ -136,15 +227,15 @@ const handleClick = () => {
 
       .edit-stage {
         position: relative;
-        width: 2000px;
-        height: 2000px;
+        // width: 2000px;
+        // height: 2000px;
         background-color: #fff;
         // linear-gradient 参数可理解为：边线水平向角度，边线颜色，边线宽度起始值，填充色，边线宽度结束值
         // 边线宽度 = Math.abs(边线宽度起始值 - 边线宽度结束值)
         background-image:
-          linear-gradient(90deg, #dedede 1px, transparent 0px),
-          linear-gradient(0deg, #dedede 1px, transparent 0px);
-        background-position-x: -1px; // 取消左边第一根竖线
+          linear-gradient(90deg, $cell-border-color 1px, transparent 0px),
+          linear-gradient(0deg, $cell-border-color 1px, transparent 0px);
+        // background-position-x: -1px; // 取消左边第一根竖线
         background-size: 80px 34px; // 格子宽高
       }
 
